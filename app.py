@@ -1,8 +1,3 @@
-"""
-    Salvador Mesias Damián Navarro
-    2024
-"""
-
 from dash import Dash, html, dcc 
 import dash
 
@@ -13,16 +8,16 @@ app = Dash(
 )
 
 app.layout = html.Div(children=[
-    #Primer Div
-    html.Div(className='header',children=[
+    # Primer Div
+    html.Div(className='header', children=[
         html.Img(className='logo', src='assets/logo.png'),
-        html.Div(className='div_flex_column',children=[
+        html.Div(className='div_flex_column', children=[
             html.H1('Interfaz Gráfica', className='main_title'),
             html.H3('Salvador Mesias Damián Navarro', className='main_subtitle')
         ])
     ]),
     
-    #Segundo Div
+    # Segundo Div
     html.Div(className='contenedor_navegacion', children=[
         dcc.Link(html.Button('Modelo 01', className='boton edo_1'), href='/'),
         dcc.Link(html.Button('Modelo 02', className='boton edo_2'), href='/2'),
@@ -33,5 +28,8 @@ app.layout = html.Div(children=[
     dash.page_container 
 ])
 
-if __name__ =='__main__':
-    app.run(debug=True, port='5000')
+# Expone el servidor Flask interno
+server = app.server
+
+if __name__ == '__main__':
+    app.run(debug=True, port=5000)
