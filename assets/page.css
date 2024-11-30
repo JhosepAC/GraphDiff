@@ -1,0 +1,133 @@
+/** Pages **/
+.Pages {
+    width: 100%;
+    min-height: 600px;
+    display: flex;
+    /* flex-direction: column; */
+    align-items: center;
+    box-sizing: border-box;
+    padding: 20px;
+    gap: 20px;
+    background-color: #F4F7FC;
+}
+
+/** Estilos para la sección de parámetros **/
+.div_parametros {
+    width: 100%;
+    background-color: #ffffff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    padding: 20px;
+    /* margin-bottom: 20px; */
+}
+
+/** Estilos para la sección de la gráfica **/
+.div_grafica {
+    width: 100%;    
+    background-color: #ffffff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    padding: 20px;
+}
+
+/** Flex container para manejar la disposición de los inputs **/
+.div_flex_container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: space-between;
+}
+
+input {
+    box-sizing: border-box;
+    width: 100%;
+}
+
+/** Estilos para los inputs **/
+input[type="number"] {
+    padding: 12px 15px;
+    border: 2px solid #d1d1d1;
+    border-radius: 8px;
+    font-size: 16px;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    background-color: #F9F9F9;
+    color: #333;
+}
+
+/* Cambios visuales cuando el input está en focus */
+input[type="number"]:focus {
+    border-color: #007bff;
+    box-shadow: 0 4px 10px rgba(0, 123, 255, 0.2);
+    outline: none;
+    background-color: #ffffff;
+}
+
+/** Cada ítem dentro del flex container **/
+.div_flex_item {
+    flex: 1 1 45%; /* Ajusta el ancho de cada ítem */
+    min-width: 150px; /* Mínimo tamaño de los inputs */
+}
+
+/** Para pantallas pequeñas, los ítems ocuparán el 100% del ancho **/
+@media (max-width: 768px) {
+    .div_flex_item {
+        flex: 1 1 100%; /* Ocupa todo el ancho en pantallas pequeñas */
+    }
+
+    .toggle-button {
+        width: 100%;
+        padding: 15px;
+    }
+
+    input[type="number"] {
+        width: 100%;
+    }
+
+    .Pages {
+        flex-direction: column;
+        align-items: center;
+    }
+}
+
+/** Estilos para los títulos de los inputs **/
+.div_flex_item h3 {
+    font-size: 16px;
+    color: #007bff;
+    margin-bottom: 8px;
+}
+
+/** Botón **/
+.toggle-button {
+    background-color: #007bff;
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.toggle-button:hover {
+    background-color: #0056b3;
+    transform: translateY(-2px);
+}
+
+.toggle-button:active {
+    background-color: #003f7f;
+    transform: translateY(0);
+}
+
+/** Botón centrado **/
+.div_button {
+    text-align: center;
+    margin-top: 20px;
+}
+
+/** Efecto en hover para el input **/
+input[type="number"]:hover {
+    border-color: #0056b3;
+    background-color: #f0f8ff;
+}

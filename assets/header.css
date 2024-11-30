@@ -1,0 +1,54 @@
+.header {
+    background-color: #FFF;
+    display: flex;
+    align-items: center;
+    height: 80px;
+    padding: 20px;
+    border-radius: 8px;
+}
+
+.header-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.logo {
+    height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: auto;
+}
+
+.main_title {
+    color: black;
+    font-size: 1.8em;
+    margin-left: 20px;
+}
+
+.main_subtitle {
+    color: black;
+    font-size: 1.2em;
+    margin-left: 20px;
+}
+
+.div_flex {
+    display: flex;
+    justify-content: space-between;
+}
+
+.div_flex_column {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.div_button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    margin: 10px 0;
+}

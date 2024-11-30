@@ -1,0 +1,38 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    background-color: #FFF;
+    overflow: hidden;
+}
+
+/** En pantallas grandes, se distribuyen horizontalmente **/
+@media (min-width: 768px) {
+
+    .Pages {
+        flex-direction: row;
+        align-items: flex-start;
+    }
+}
+
+/** Ajustar el tamaño de los inputs en pantallas pequeñas **/
+@media (max-width: 768px) {
+    .div_flex > div {
+        width: 100%;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    .logo {
+        height: 40px;
+    }
+
+    .main_title {
+        font-size: 1.5em;
+    }
+
+    .boton {
+        width: 100%;
+        margin: 5px;
+    }
+}
