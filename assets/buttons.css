@@ -3,10 +3,11 @@
     background-color: #f8f9fa;
     display: flex;
     justify-content: center;
+    align-items: center;
     gap: 30px;
     width: 100%;
     padding: 10px;
-    height: 60px;
+    height: auto;
 }
 
 /** Estilo general para los botones **/
