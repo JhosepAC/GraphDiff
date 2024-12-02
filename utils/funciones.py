@@ -308,3 +308,84 @@ def modelo_oscilador_armonico(m, k, x0, v0, t):
     fig.update_yaxes(mirror=True, showline=True, linecolor='green', gridcolor='gray', showgrid=True)
 
     return fig
+
+def modelo_sir_estocastico(S0, I0, R0, beta, gamma, delta, sigma_S, sigma_I, sigma_R, t):
+    """
+    Simula y visualiza un modelo SIR estocástico.
+
+    Parámetros:
+    -----------
+    S0 : float, población susceptible inicial
+    I0 : float, población infectada inicial
+    R0 : float, población recuperada inicial
+    beta : float, tasa de infección
+    gamma : float, tasa de recuperación
+    delta : float, tasa de mortalidad
+    sigma_S : float, volatilidad de la población susceptible
+    sigma_I : float, volatilidad de la población infectada
+    sigma_R : float, volatilidad de la población recuperada
+    t : float, tiempo total de simulación
+    """
+    # Validación de parámetros
+    total_population = S0 + I0 + R0
+    if total_population <= 0 or beta <= 0 or gamma <= 0 or delta <= 0:
+        raise ValueError("Parámetros inválidos")
+
+    def sir_model_stochastic(t, y, beta, gamma, delta, sigma_S, sigma_I, sigma_R):
+        S, I, R = y
+        dSdt = -beta * S * I / total_population + sigma_S * np.random.normal()
+        dIdt = beta * S * I / total_population - (delta + gamma) * I + sigma_I * np.random.normal()
+        dRdt = gamma * I - delta * R + sigma_R * np.random.normal()
+        return [dSdt, dIdt, dRdt]
+
+    # Resolver ecuaciones diferenciales estocásticas usando el método de Euler
+    initial_conditions = [S0, I0, R0]
+    time_points = np.linspace(0, t, 200)
+    results = np.zeros((len(time_points), 3))
+    results[0] = initial_conditions
+
+    for i in range(1, len(time_points)):
+        dt = time_points[i] - time_points[i - 1]
+        S, I, R = results[i - 1]
+        dS, dI, dR = sir_model_stochastic(time_points[i], [S, I, R], beta, gamma, delta, sigma_S, sigma_I, sigma_R)
+        results[i] = [S + dS * dt, I + dI * dt, R + dR * dt]
+
+    # Extraer los resultados para cada compartimento
+    S, I, R = results[:, 0], results[:, 1], results[:, 2]
+
+    # Crear figura con Plotly
+    fig = go.Figure()
+
+    # Añadir curvas con diferentes estilos
+    fig.add_trace(go.Scatter(
+        x=time_points, y=S, mode='lines', 
+        name='Susceptibles', 
+        line=dict(color='blue', width=2)
+    ))
+    
+    fig.add_trace(go.Scatter(
+        x=time_points, y=I, mode='lines', 
+        name='Infectados', 
+        line=dict(color='red', width=2)
+    ))
+    
+    fig.add_trace(go.Scatter(
+        x=time_points, y=R, mode='lines', 
+        name='Recuperados', 
+        line=dict(color='green', width=2)
+    ))
+
+    # Actualizar diseño con información adicional
+    fig.update_layout(
+        title='Modelo SIR Estocástico',
+        xaxis_title='Tiempo',
+        yaxis_title='Población',
+        width=900,
+        height=500,
+        template='plotly_white'
+    )
+
+    fig.update_xaxes(mirror=True, showline=True, linecolor='gray', gridcolor='lightgray')
+    fig.update_yaxes(mirror=True, showline=True, linecolor='gray', gridcolor='lightgray')
+
+    return fig

@@ -23,6 +23,7 @@ app.layout = html.Div(children=[
         dcc.Link(html.Button('Modelo 02', className='boton edo_2'), href='/2'),
         dcc.Link(html.Button('Modelo 03', className='boton edo_3'), href='/3'),
         dcc.Link(html.Button('Modelo 04', className='boton edo_4'), href='/4'),
+        dcc.Link(html.Button('Modelo 05', className='boton edo_5'), href='/5'),
     ]),
                       
     dash.page_container 
