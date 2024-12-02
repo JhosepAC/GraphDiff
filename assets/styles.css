@@ -6,17 +6,60 @@ body {
     overflow-x: hidden;
 }
 
-/** En pantallas grandes, se distribuyen horizontalmente **/
-@media (min-width: 1000px) {
+/** Responsive layout for all screen sizes **/
+.Pages {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: 20px;
+    padding: 10px;
+    box-sizing: border-box;
+}
 
+/** Responsive parameter and graph containers **/
+.div_parametros, 
+.div_grafica {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/** Responsive input container **/
+.div_flex_container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: space-between;
+}
+
+.div_flex_item {
+    flex: 1 1 calc(50% - 10px);
+    min-width: 200px;
+    box-sizing: border-box;
+}
+
+/** Media query for large screens **/
+@media (min-width: 1024px) {
     .Pages {
         flex-direction: row;
         align-items: flex-start;
     }
+
+    .div_parametros {
+        flex: 1;
+        margin-right: 20px;
+    }
+
+    .div_grafica {
+        flex: 1;
+    }
 }
 
-/** Ajustar el tamaño de los inputs en pantallas pequeñas **/
-@media (max-width: 1000px) {
+/** Media query for small screens **/
+@media (max-width: 1023px) {
+    .div_flex_item {
+        flex: 1 1 100%;
+    }
+
     .div_flex > div {
         width: 100%;
         margin-bottom: 20px;
@@ -31,14 +74,27 @@ body {
         font-size: 1.5em;
     }
 
-    .main_subtitle{
+    .main_subtitle {
         font-size: 1em;
     }
 
     .boton {
         width: 100%;
-        padding: 5px;
-        font-size: 13px;
-        margin: 5px;
+        padding: 10px;
+        font-size: 14px;
+        margin: 5px 0;
     }
+
+    /** Ensure graphs are fully visible **/
+    .grafica {
+        width: 100%;
+        overflow-x: auto;
+    }
+}
+
+/** Responsive inputs **/
+input[type="number"] {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
 }

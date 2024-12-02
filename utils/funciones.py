@@ -201,7 +201,8 @@ def modelo_sir(S0, I0, R0, beta, gamma, t, plot_type='default'):
 
     def sir_model(t, y, beta, gamma):
         S, I, R = y
-        dSdt = -beta * S * I / total_population
+        # Prevent S from becoming negative
+        dSdt = max(-beta * S * I / total_population, -S)
         dIdt = beta * S * I / total_population - gamma * I
         dRdt = gamma * I
         return [dSdt, dIdt, dRdt]
