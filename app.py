@@ -10,7 +10,7 @@ app = Dash(
 app.layout = html.Div(children=[
     # Primer Div
     html.Div(className='header', children=[
-        html.Img(className='logo', src='assets/logo.png'),
+        html.Img(className='logo', src='assets/images/logo.png'),
         html.Div(className='div_flex_column', children=[
             html.H1('Interfaz Gráfica', className='main_title'),
             html.H3('Salvador Mesias Damián Navarro', className='main_subtitle')

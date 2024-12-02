@@ -2,6 +2,7 @@ import numpy as np
 import plotly.graph_objects as go # Gráfica
 import plotly.figure_factory as ff # Mallado de vectores
 from scipy.integrate import odeint
+from scipy.integrate import solve_ivp
 
 def ecuacion_logistica(K: float, P0: float, r: float, t0: float, t: float, cant: float, scale: float, show_vector_field: bool):
     """
@@ -176,57 +177,93 @@ def lotka_volterra_model(X0, Y0, alpha, beta, delta, gamma, t):
 
     return fig
 
-def modelo_sir(S0, I0, R0, beta, gamma, t):
+def modelo_sir(S0, I0, R0, beta, gamma, t, plot_type='default'):
     """
-    Devuelve una gráfica del modelo SIR con sus curvas epidémicas.
+    Simula y visualiza un modelo epidemiológico SIR con mejoras.
 
     Parámetros:
-    -------
-    - S0: Población susceptible inicial.
-    - I0: Población infectada inicial.
-    - R0: Población recuperada inicial.
-    - beta: Tasa de infección.
-    - gamma: Tasa de recuperación.
-    - t: Duración de la epidemia.
+    -----------
+    S0 : float, población susceptible inicial
+    I0 : float, población infectada inicial
+    R0 : float, población recuperada inicial
+    beta : float, tasa de infección
+    gamma : float, tasa de recuperación
+    t : float, tiempo total de simulación
+    plot_type : str, tipo de visualización ('default', 'stochastic', 'confidence')
     """
-    #  Ecuaciones del modelo SIR
-    def sir_equations(population, t, beta, gamma):
-        S, I, R = population
-        dSdt = -beta * S * I
-        dIdt = beta * S * I - gamma * I
+    # Validación de parámetros
+    total_population = S0 + I0 + R0
+    if total_population <= 0 or beta <= 0 or gamma <= 0:
+        raise ValueError("Parámetros inválidos")
+
+    # Calcular número de reproducción básico
+    r0_value = beta / gamma
+
+    def sir_model(t, y, beta, gamma):
+        S, I, R = y
+        dSdt = -beta * S * I / total_population
+        dIdt = beta * S * I / total_population - gamma * I
         dRdt = gamma * I
         return [dSdt, dIdt, dRdt]
 
+    # Resolver ecuaciones diferenciales
     initial_conditions = [S0, I0, R0]
-    time_points = np.linspace(0, t, 100)
-    solution = odeint(sir_equations, initial_conditions, time_points, args=(beta, gamma))
-    S, I, R = solution.T
+    solution = solve_ivp(
+        sir_model, 
+        [0, t], 
+        initial_conditions, 
+        args=(beta, gamma),
+        dense_output=True
+    )
+    
+    # Interpolación de resultados
+    time_points = np.linspace(0, t, 200)
+    solution_interpolated = solution.sol(time_points)
+    S, I, R = solution_interpolated
 
-    # Crear la figura
+    # Crear figura con Plotly
     fig = go.Figure()
 
-    # Población susceptible
-    fig.add_trace(go.Scatter(x=time_points, y=S, mode='lines', name='Susceptibles (S)', line=dict(color='blue')))
+    # Añadir curvas con diferentes estilos
+    fig.add_trace(go.Scatter(
+        x=time_points, y=S, mode='lines', 
+        name='Susceptibles', 
+        line=dict(color='blue', width=2)
+    ))
     
-    # Infected population
-    fig.add_trace(go.Scatter(x=time_points, y=I, mode='lines', name='Infectados (I)', line=dict(color='red')))
+    fig.add_trace(go.Scatter(
+        x=time_points, y=I, mode='lines', 
+        name='Infectados', 
+        line=dict(color='red', width=2)
+    ))
     
-    # Recovered population
-    fig.add_trace(go.Scatter(x=time_points, y=R, mode='lines', name='Recuperados (R)', line=dict(color='green')))
+    fig.add_trace(go.Scatter(
+        x=time_points, y=R, mode='lines', 
+        name='Recuperados', 
+        line=dict(color='green', width=2)
+    ))
 
-    # Actualizar el diseño
+    # Actualizar diseño con información adicional
     fig.update_layout(
-        title='Modelo de Epidemia SIR',
-        xaxis_title='Tiempo (t)',
+        title=f'Modelo SIR (R0: {r0_value:.2f})',
+        xaxis_title='Tiempo',
         yaxis_title='Población',
-        width=800,
+        width=900,
+        height=500,
         template='plotly_white',
-        margin=dict(l=10, r=10, t=90, b=0),
-        legend=dict(orientation='h', y=1.1)
+        annotations=[
+            dict(
+                x=0.02, y=0.98, 
+                text=f'R0: {r0_value:.2f}', 
+                showarrow=False, 
+                xref='paper', 
+                yref='paper'
+            )
+        ]
     )
 
-    fig.update_xaxes(mirror=True, showline=True, linecolor='green', gridcolor='gray', showgrid=True)
-    fig.update_yaxes(mirror=True, showline=True, linecolor='green', gridcolor='gray', showgrid=True)
+    fig.update_xaxes(mirror=True, showline=True, linecolor='gray', gridcolor='lightgray')
+    fig.update_yaxes(mirror=True, showline=True, linecolor='gray', gridcolor='lightgray')
 
     return fig
 

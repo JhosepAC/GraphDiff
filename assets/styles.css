@@ -7,7 +7,7 @@ body {
 }
 
 /** En pantallas grandes, se distribuyen horizontalmente **/
-@media (min-width: 768px) {
+@media (min-width: 1000px) {
 
     .Pages {
         flex-direction: row;
@@ -16,7 +16,7 @@ body {
 }
 
 /** Ajustar el tamaño de los inputs en pantallas pequeñas **/
-@media (max-width: 768px) {
+@media (max-width: 1000px) {
     .div_flex > div {
         width: 100%;
         margin-bottom: 20px;

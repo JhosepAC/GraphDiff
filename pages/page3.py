@@ -9,13 +9,9 @@ dash.register_page(
 )
 
 layout = html.Div(className='Pages', children=[
-
     html.Div(className='div_parametros', children=[
-
         html.H2('PARÁMETROS'),
-
         html.Div(className='div_flex_container', children=[
-            
             html.Div(className='div_flex_item', children=[
                 html.H3('Susceptibles Iniciales'),
                 dcc.Input(type='number', value=1000, id='sus_ini', step=1, min=0)
@@ -45,7 +41,6 @@ layout = html.Div(className='Pages', children=[
 
     html.Div(className='div_grafica', children=[
         html.H2('GRÁFICA DE EPIDEMIA SIR', style={'textAlign': 'center'}),
-        
         html.Div(className='grafica', children=[
             dcc.Loading(type='default', children=dcc.Graph(id='figura_sir'))
         ])
