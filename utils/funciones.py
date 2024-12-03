@@ -10,35 +10,30 @@ DEFAULT_HEIGHT = 500
 DEFAULT_TEMPLATE = 'plotly_white'
 
 class ModelValidator:
-    """Validate parameters for mathematical models"""
+    """Validar parámetros para modelos matemáticos"""
     @staticmethod
     def validate_positive_params(*params):
-        """Ensure all parameters are positive"""
+        """Asegúrese de que todos los parámetros sean positivos"""
         if any(param <= 0 for param in params):
-            raise ValueError("All parameters must be positive")
+            raise ValueError("Todos los parámetros deben ser positivos")
 
     @staticmethod
     def validate_population(total_population):
-        """Ensure total population is positive"""
+        """Asegurarse de que la población total sea positiva"""
         if total_population <= 0:
-            raise ValueError("Total population must be positive")
+            raise ValueError("La población total debe ser positiva")
 
 def plot_model(time_points, curves, title, x_label='Time', y_label='Population'):
     """
-    Generic function to plot models using Plotly
-    
-    Parameters:
+    Crea una gráfica con las curvas especificadas.
+
+    Parámetros:
     -----------
-    time_points : np.ndarray
-        Time points for the plot
-    curves : list
-        List of dictionaries with 'data', 'name', 'color'
-    title : str
-        Plot title
-    x_label : str, optional
-        X-axis label
-    y_label : str, optional
-        Y-axis label
+    time_points : np.array, puntos de tiempo
+    curves : list, lista de curvas
+    title : str, título de la gráfica
+    x_label : str, etiqueta del eje x
+    y_label : str, etiqueta del eje y
     """
     fig = go.Figure()
     
@@ -77,26 +72,18 @@ def ecuacion_logistica(K: float, P0: float, r: float, t0: float, t: float,
                        cant: int = 50, scale: float = 1.0, 
                        show_vector_field: bool = True):
     """
-    Returns a plot of the logistic equation with enhanced visualization and validation
-    
-    Parameters:
+    Simula y visualiza un modelo de ecuación logística.
+
+    Parámetros:
     -----------
-    K : float
-        Carrying capacity
-    P0 : float
-        Initial population
-    r : float
-        Population growth rate
-    t0 : float
-        Initial time
-    t : float
-        Final time
-    cant : int, optional
-        Number of partitions for axes
-    scale : float, optional
-        Scale for vector field
-    show_vector_field : bool, optional
-        Show vector field
+    K : float, capacidad de carga
+    P0 : float, población inicial
+    r : float, tasa de crecimiento
+    t0 : float, tiempo inicial
+    t : float, tiempo total de simulación
+    cant : int, cantidad de puntos
+    scale : float, escala del campo vectorial
+    show_vector_field : bool, mostrar campo vectorial
     """
     ModelValidator.validate_positive_params(K, P0, r)
     
@@ -131,8 +118,8 @@ def ecuacion_logistica(K: float, P0: float, r: float, t0: float, t: float,
 
     # Add curves
     curves = [
-        {'data': funcion, 'name': 'Logistic Equation', 'color': 'blue'},
-        {'data': np.full_like(t_values, K), 'name': 'Carrying Capacity', 'color': 'red'}
+        {'data': funcion, 'name': 'Ecuación logística', 'color': 'blue'},
+        {'data': np.full_like(t_values, K), 'name': 'Capacidad de carga', 'color': 'red'}
     ]
     
     fig.add_traces([
@@ -149,9 +136,9 @@ def ecuacion_logistica(K: float, P0: float, r: float, t0: float, t: float,
     ])
 
     fig.update_layout(
-        title='Vector Field of dP/dt = rP(1 - P/k)',
-        xaxis_title='Time (t)',
-        yaxis_title='Population (P)',
+        title='Campo vectorial de dP/dt = rP(1 - P/k)',
+        xaxis_title='Tiempo (t)',
+        yaxis_title='Población (P)',
         width=800,
         template=DEFAULT_TEMPLATE,
         margin=dict(l=10, r=10, t=90, b=0),
@@ -165,24 +152,17 @@ def lotka_volterra(X0: float, Y0: float,
                    delta: float, gamma: float, 
                    t: float):
     """
-    Optimized Lotka-Volterra model with enhanced validation
-    
-    Parameters:
+    Simula y visualiza un modelo de Lotka-Volterra determinista.
+
+    Parámetros:
     -----------
-    X0 : float
-        Initial prey population
-    Y0 : float
-        Initial predator population
-    alpha : float
-        Prey growth rate
-    beta : float
-        Predation rate
-    delta : float
-        Predator growth rate
-    gamma : float
-        Predator mortality rate
-    t : float
-        Simulation duration
+    X0 : float, población inicial de presas
+    Y0 : float, población inicial de depredadores
+    alpha : float, tasa de crecimiento de presas
+    beta : float, tasa de depredación
+    delta : float, tasa de crecimiento de depredadores
+    gamma : float, tasa de mortalidad de depredadores
+    t : float, tiempo total de simulación
     """
     ModelValidator.validate_positive_params(X0, Y0, alpha, beta, delta, gamma)
 
@@ -198,37 +178,31 @@ def lotka_volterra(X0: float, Y0: float,
     X, Y = solution.T
 
     curves = [
-        {'data': X, 'name': 'Prey (X)', 'color': 'blue'},
-        {'data': Y, 'name': 'Predator (Y)', 'color': 'red'}
+        {'data': X, 'name': 'Presa (X)', 'color': 'blue'},
+        {'data': Y, 'name': 'Depredador (Y)', 'color': 'red'}
     ]
 
     return plot_model(
         time_points, 
         curves, 
-        'Lotka-Volterra Model', 
-        'Time (t)', 
-        'Population (P)'
+        'Modelo Lotka-Volterra', 
+        'Tiempo (t)', 
+        'Población (P)'
     )
 
 def modelo_sir(S0: float, I0: float, R0: float, 
                beta: float, gamma: float, t: float):
     """
-    Optimized SIR model with robust validation
-    
-    Parameters:
+    Simula y visualiza un modelo SIR determinista.
+
+    Parámetros:
     -----------
-    S0 : float
-        Initial susceptible population
-    I0 : float
-        Initial infected population
-    R0 : float
-        Initial recovered population
-    beta : float
-        Infection rate
-    gamma : float
-        Recovery rate
-    t : float
-        Simulation time
+    S0 : float, población susceptible inicial
+    I0 : float, población infectada inicial
+    R0 : float, población recuperada inicial
+    beta : float, tasa de infección
+    gamma : float, tasa de recuperación
+    t : float, tiempo total de simulación
     """
     total_population = S0 + I0 + R0
     ModelValidator.validate_population(total_population)
@@ -256,15 +230,15 @@ def modelo_sir(S0: float, I0: float, R0: float,
     S, I, R = solution_interpolated
 
     curves = [
-        {'data': S, 'name': 'Susceptible', 'color': 'blue'},
-        {'data': I, 'name': 'Infected', 'color': 'red'},
-        {'data': R, 'name': 'Recovered', 'color': 'green'}
+        {'data': S, 'name': 'Susceptibles (S)', 'color': 'blue'},
+        {'data': I, 'name': 'Infectados (I)', 'color': 'red'},
+        {'data': R, 'name': 'Recuperados (R)', 'color': 'green'}
     ]
     
     fig = plot_model(
         time_points, 
         curves, 
-        f'SIR Model (R0: {r0_value:.2f})'
+        f'Modelo SIR (R0: {r0_value:.2f})'
     )
 
     fig.add_annotation(
@@ -279,15 +253,15 @@ def modelo_sir(S0: float, I0: float, R0: float,
 
 def modelo_oscilador_armonico(m, k, x0, v0, t):
     """
-    Returns a graph of the simple harmonic oscillator model
+    Simula y visualiza un modelo de oscilador armónico simple.
 
-    Parameters:
-    -------
-    m: Mass of the object
-    k: Spring constant
-    x0: Initial position
-    v0: Initial velocity
-    t: Simulation duration
+    Parámetros:
+    -----------
+    m : float, masa del oscilador
+    k : float, constante del resorte
+    x0 : float, posición inicial
+    v0 : float, velocidad inicial
+    t : float, tiempo total de simulación
     """
     # Harmonic oscillator equations
     omega = np.sqrt(k / m)
@@ -310,9 +284,9 @@ def modelo_oscilador_armonico(m, k, x0, v0, t):
 
     # Update layout
     fig.update_layout(
-        title='Simple Harmonic Oscillator Model',
-        xaxis_title='Time (t)',
-        yaxis_title='Position (x)',
+        title='Modelo de oscilador armónico simple',
+        xaxis_title='Tiempo (t)',
+        yaxis_title='Posición (x)',
         width=800,
         template='plotly_white',
         margin=dict(l=10, r=10, t=90, b=0),
@@ -374,27 +348,27 @@ def modelo_sir_estocastico(S0, I0, R0, beta, gamma, delta, sigma_S, sigma_I, sig
     # Añadir curvas con diferentes estilos
     fig.add_trace(go.Scatter(
         x=time_points, y=S, mode='lines', 
-        name='Susceptibles', 
+        name='Susceptibles (S)', 
         line=dict(color='blue', width=2)
     ))
     
     fig.add_trace(go.Scatter(
         x=time_points, y=I, mode='lines', 
-        name='Infectados', 
+        name='Infectados (I)', 
         line=dict(color='red', width=2)
     ))
     
     fig.add_trace(go.Scatter(
         x=time_points, y=R, mode='lines', 
-        name='Recuperados', 
+        name='Recuperados (R)', 
         line=dict(color='green', width=2)
     ))
 
     # Actualizar diseño con información adicional
     fig.update_layout(
         title='Modelo SIR Estocástico',
-        xaxis_title='Tiempo',
-        yaxis_title='Población',
+        xaxis_title='Tiempo (t)',
+        yaxis_title='Población (P)',
         width=900,
         height=500,
         template='plotly_white'
