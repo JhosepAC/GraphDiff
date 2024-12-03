@@ -1,47 +1,126 @@
 import numpy as np
-import plotly.graph_objects as go # Gráfica
-import plotly.figure_factory as ff # Mallado de vectores
-from scipy.integrate import odeint
-from scipy.integrate import solve_ivp
+from scipy.integrate import solve_ivp, odeint
+import plotly.graph_objects as go
+import plotly.figure_factory as ff
 
-def ecuacion_logistica(K: float, P0: float, r: float, t0: float, t: float, cant: float, scale: float, show_vector_field: bool):
+# Global Constants
+DEFAULT_TIME_POINTS = 200
+DEFAULT_WIDTH = 900
+DEFAULT_HEIGHT = 500
+DEFAULT_TEMPLATE = 'plotly_white'
+
+class ModelValidator:
+    """Validate parameters for mathematical models"""
+    @staticmethod
+    def validate_positive_params(*params):
+        """Ensure all parameters are positive"""
+        if any(param <= 0 for param in params):
+            raise ValueError("All parameters must be positive")
+
+    @staticmethod
+    def validate_population(total_population):
+        """Ensure total population is positive"""
+        if total_population <= 0:
+            raise ValueError("Total population must be positive")
+
+def plot_model(time_points, curves, title, x_label='Time', y_label='Population'):
     """
-    Retorna una gráfica de la ecuación logística con su campo vectorial.
-
-    Parámetros:
-    -------
-    - K: Capacidad de carga.
-    - P0: Población Inicial.
-    - r: Tasa de crecimiento poblacional.
-    - t0: Tiempo inicial.
-    - t: Tiempo final.
-    - cant: Las particiones para el eje temporal y espacial. Si es None, no dibuja el campo vectorial.
-    - scale: Tamaño del vector del campo vectorial.
-    - show_vector_field: Booleano para mostrar el campo vectorial.
+    Generic function to plot models using Plotly
+    
+    Parameters:
+    -----------
+    time_points : np.ndarray
+        Time points for the plot
+    curves : list
+        List of dictionaries with 'data', 'name', 'color'
+    title : str
+        Plot title
+    x_label : str, optional
+        X-axis label
+    y_label : str, optional
+        Y-axis label
     """
+    fig = go.Figure()
+    
+    for curve in curves:
+        fig.add_trace(go.Scatter(
+            x=time_points, 
+            y=curve['data'], 
+            mode='lines', 
+            name=curve['name'], 
+            line=dict(color=curve['color'], width=2)
+        ))
+    
+    fig.update_layout(
+        title={'text': title, 'x': 0.5, 'y': 0.92, 'xanchor': 'center'},
+        xaxis_title=x_label,
+        yaxis_title=y_label,
+        width=DEFAULT_WIDTH,
+        height=DEFAULT_HEIGHT,
+        template=DEFAULT_TEMPLATE,
+        margin=dict(l=10, r=10, t=90, b=0),
+        legend=dict(orientation='h', y=1.1)
+    )
+    
+    fig.update_xaxes(
+        mirror=True, showline=True, 
+        linecolor='green', gridcolor='gray', showgrid=False
+    )
+    fig.update_yaxes(
+        mirror=True, showline=True, 
+        linecolor='green', gridcolor='gray', showgrid=False
+    )
+    
+    return fig
 
-    # Rango de P y t
-    P_values = np.linspace(0, K + 5, cant)  # Puedes usar un valor fijo para más estabilidad
+def ecuacion_logistica(K: float, P0: float, r: float, t0: float, t: float, 
+                       cant: int = 50, scale: float = 1.0, 
+                       show_vector_field: bool = True):
+    """
+    Returns a plot of the logistic equation with enhanced visualization and validation
+    
+    Parameters:
+    -----------
+    K : float
+        Carrying capacity
+    P0 : float
+        Initial population
+    r : float
+        Population growth rate
+    t0 : float
+        Initial time
+    t : float
+        Final time
+    cant : int, optional
+        Number of partitions for axes
+    scale : float, optional
+        Scale for vector field
+    show_vector_field : bool, optional
+        Show vector field
+    """
+    ModelValidator.validate_positive_params(K, P0, r)
+    
+    # Range of P and t
+    P_values = np.linspace(0, K + 5, cant)
     t_values = np.linspace(0, t, cant)
 
-    # Crear la malla de puntos (P, t)
+    # Create point mesh (P, t)
     T, P = np.meshgrid(t_values, P_values)
 
-    # Definir la EDO
+    # Define ODE
     dP_dt = r * P * (1 - P / K)
 
-    # Solución exacta de la Ecuación Logística
+    # Exact solution of Logistic Equation
     funcion = K * P0 * np.exp(r * t_values) / (P0 * np.exp(r * t_values) + (K - P0) * np.exp(r * t0))
 
-    # Crear la figura
+    # Create figure
     fig = go.Figure()
 
-    # Campo vectorial: dP/dt (componente vertical)
-    if show_vector_field:  # Solo crea el campo de vectores si cant no es None
-        U = np.ones_like(T)  # Componente en t (horizontal)
-        V = dP_dt           # Componente en P (vertical)
+    # Vector field
+    if show_vector_field:
+        U = np.ones_like(T)  # Component in t (horizontal)
+        V = dP_dt  # Component in P (vertical)
 
-        # Crear el campo de vectores con Plotly
         quiver = ff.create_quiver(
             T, P, U, V,
             scale=scale,
@@ -50,254 +129,190 @@ def ecuacion_logistica(K: float, P0: float, r: float, t0: float, t: float, cant:
         )
         fig.add_traces(quiver.data)
 
-    # Crear la función logística
-    fig.add_trace(
+    # Add curves
+    curves = [
+        {'data': funcion, 'name': 'Logistic Equation', 'color': 'blue'},
+        {'data': np.full_like(t_values, K), 'name': 'Carrying Capacity', 'color': 'red'}
+    ]
+    
+    fig.add_traces([
         go.Scatter(
-            x=t_values,
-            y=funcion,
-            line=dict(color='blue'),
-            name='Ecuación Logística'
-        )
-    )
+            x=t_values, 
+            y=curve['data'], 
+            mode='lines', 
+            name=curve['name'], 
+            line=dict(
+                color=curve['color'], 
+                dash='dash' if 'capacity' in curve['name'].lower() else 'solid'
+            )
+        ) for curve in curves
+    ])
 
-    fig.add_trace(
-        go.Scatter(
-            x=[0, t],
-            y=[K, K],
-            mode='lines',
-            line=dict(color='red', dash='dash'),
-            name='Capacidad de carga'
-        )
-    )
-
-    # Etiquetas para la gráfica
     fig.update_layout(
-        title={
-            'text': 'Campo de vectores de dP/dt = rP(1 - P/k)',
-            'x': 0.5,
-            'y': 0.92,
-            'xanchor': 'center'
-        },
-        xaxis_title='Tiempo (t)',
-        yaxis_title='Población (P)',
+        title='Vector Field of dP/dt = rP(1 - P/k)',
+        xaxis_title='Time (t)',
+        yaxis_title='Population (P)',
         width=800,
-        template='plotly_white',
+        template=DEFAULT_TEMPLATE,
         margin=dict(l=10, r=10, t=90, b=0),
         legend=dict(orientation='h', y=1.1)
     )
 
-    # Contorno a la gráfica
-    fig.update_xaxes(
-        mirror=True,
-        showline=True,
-        linecolor='green',
-        gridcolor='gray',
-        showgrid=False
-    )
-    fig.update_yaxes(
-        mirror=True,
-        showline=True,
-        linecolor='green',
-        gridcolor='gray',
-        showgrid=False
-    )
-
     return fig
 
-
-def lotka_volterra_model(X0, Y0, alpha, beta, delta, gamma, t):
+def lotka_volterra(X0: float, Y0: float, 
+                   alpha: float, beta: float, 
+                   delta: float, gamma: float, 
+                   t: float):
     """
-    Devuelve una gráfica del modelo de Lotka-Volterra con sus curvas de población.
-
-    Parámetros:
-    -------
-    - X0: Población inicial de presas.
-    - Y0: Población inicial de depredadores.
-    - alpha: Tasa de crecimiento de presas.
-    - beta: Tasa de depredación.
-    - delta: Tasa de crecimiento de depredadores.
-    - gamma: Tasa de mortalidad de depredadores.
-    - t: Duración de la simulación.
+    Optimized Lotka-Volterra model with enhanced validation
+    
+    Parameters:
+    -----------
+    X0 : float
+        Initial prey population
+    Y0 : float
+        Initial predator population
+    alpha : float
+        Prey growth rate
+    beta : float
+        Predation rate
+    delta : float
+        Predator growth rate
+    gamma : float
+        Predator mortality rate
+    t : float
+        Simulation duration
     """
+    ModelValidator.validate_positive_params(X0, Y0, alpha, beta, delta, gamma)
 
-    # Ecuaciones de Lotka-Volterra
     def model(populations, t, alpha, beta, delta, gamma):
         X, Y = populations
         dXdt = alpha * X - beta * X * Y
         dYdt = delta * X * Y - gamma * Y
         return [dXdt, dYdt]
 
-    # Solución del modelo
     initial_conditions = [X0, Y0]
-    time_points = np.linspace(0, t, 100)  # Generate 100 time points
+    time_points = np.linspace(0, t, DEFAULT_TIME_POINTS)
     solution = odeint(model, initial_conditions, time_points, args=(alpha, beta, delta, gamma))
     X, Y = solution.T
 
-    # Crear la figura
-    fig = go.Figure()
+    curves = [
+        {'data': X, 'name': 'Prey (X)', 'color': 'blue'},
+        {'data': Y, 'name': 'Predator (Y)', 'color': 'red'}
+    ]
 
-    # Agrergar la población de presas
-    fig.add_trace(go.Scatter(x=time_points, y=X, mode='lines', name='Presa (X)', line=dict(color='blue')))
-
-    # Agregar la población de depredadores
-    fig.add_trace(go.Scatter(x=time_points, y=Y, mode='lines', name='Depredador (Y)', line=dict(color='red')))
-
-
-    # Actualizar el diseño
-    fig.update_layout(
-        title={
-            'text': 'Modelo Lotka-Volterra',
-            'x': 0.5,
-            'y': 0.92,
-            'xanchor': 'center'
-        },
-        xaxis_title='Tiempo (t)',
-        yaxis_title='Población (P)',
-        width=800,
-        template='plotly_white',
-        margin=dict(l=10, r=10, t=90, b=0),
-        legend=dict(orientation='h', y=1.1)
+    return plot_model(
+        time_points, 
+        curves, 
+        'Lotka-Volterra Model', 
+        'Time (t)', 
+        'Population (P)'
     )
 
-    # Contorno a la grafica
-    fig.update_xaxes(
-        mirror=True,
-        showline=True,
-        linecolor='green',
-        gridcolor='gray',
-        showgrid=True
-    )
-    fig.update_yaxes(
-        mirror=True,
-        showline=True,
-        linecolor='green',
-        gridcolor='gray',
-        showgrid=True
-    )
-
-    return fig
-
-def modelo_sir(S0, I0, R0, beta, gamma, t, plot_type='default'):
+def modelo_sir(S0: float, I0: float, R0: float, 
+               beta: float, gamma: float, t: float):
     """
-    Simula y visualiza un modelo epidemiológico SIR con mejoras.
-
-    Parámetros:
+    Optimized SIR model with robust validation
+    
+    Parameters:
     -----------
-    S0 : float, población susceptible inicial
-    I0 : float, población infectada inicial
-    R0 : float, población recuperada inicial
-    beta : float, tasa de infección
-    gamma : float, tasa de recuperación
-    t : float, tiempo total de simulación
-    plot_type : str, tipo de visualización ('default', 'stochastic', 'confidence')
+    S0 : float
+        Initial susceptible population
+    I0 : float
+        Initial infected population
+    R0 : float
+        Initial recovered population
+    beta : float
+        Infection rate
+    gamma : float
+        Recovery rate
+    t : float
+        Simulation time
     """
-    # Validación de parámetros
     total_population = S0 + I0 + R0
-    if total_population <= 0 or beta <= 0 or gamma <= 0:
-        raise ValueError("Parámetros inválidos")
+    ModelValidator.validate_population(total_population)
+    ModelValidator.validate_positive_params(beta, gamma)
 
-    # Calcular número de reproducción básico
     r0_value = beta / gamma
 
-    def sir_model(t, y, beta, gamma):
+    def sir_dynamics(t, y, beta, gamma):
         S, I, R = y
-        # Prevent S from becoming negative
-        dSdt = max(-beta * S * I / total_population, -S)
+        dSdt = -beta * S * I / total_population
         dIdt = beta * S * I / total_population - gamma * I
         dRdt = gamma * I
         return [dSdt, dIdt, dRdt]
 
-    # Resolver ecuaciones diferenciales
-    initial_conditions = [S0, I0, R0]
     solution = solve_ivp(
-        sir_model, 
+        sir_dynamics, 
         [0, t], 
-        initial_conditions, 
+        [S0, I0, R0],
         args=(beta, gamma),
         dense_output=True
     )
     
-    # Interpolación de resultados
-    time_points = np.linspace(0, t, 200)
+    time_points = np.linspace(0, t, DEFAULT_TIME_POINTS)
     solution_interpolated = solution.sol(time_points)
     S, I, R = solution_interpolated
 
-    # Crear figura con Plotly
-    fig = go.Figure()
-
-    # Añadir curvas con diferentes estilos
-    fig.add_trace(go.Scatter(
-        x=time_points, y=S, mode='lines', 
-        name='Susceptibles', 
-        line=dict(color='blue', width=2)
-    ))
+    curves = [
+        {'data': S, 'name': 'Susceptible', 'color': 'blue'},
+        {'data': I, 'name': 'Infected', 'color': 'red'},
+        {'data': R, 'name': 'Recovered', 'color': 'green'}
+    ]
     
-    fig.add_trace(go.Scatter(
-        x=time_points, y=I, mode='lines', 
-        name='Infectados', 
-        line=dict(color='red', width=2)
-    ))
-    
-    fig.add_trace(go.Scatter(
-        x=time_points, y=R, mode='lines', 
-        name='Recuperados', 
-        line=dict(color='green', width=2)
-    ))
-
-    # Actualizar diseño con información adicional
-    fig.update_layout(
-        title=f'Modelo SIR (R0: {r0_value:.2f})',
-        xaxis_title='Tiempo',
-        yaxis_title='Población',
-        width=900,
-        height=500,
-        template='plotly_white',
-        annotations=[
-            dict(
-                x=0.02, y=0.98, 
-                text=f'R0: {r0_value:.2f}', 
-                showarrow=False, 
-                xref='paper', 
-                yref='paper'
-            )
-        ]
+    fig = plot_model(
+        time_points, 
+        curves, 
+        f'SIR Model (R0: {r0_value:.2f})'
     )
 
-    fig.update_xaxes(mirror=True, showline=True, linecolor='gray', gridcolor='lightgray')
-    fig.update_yaxes(mirror=True, showline=True, linecolor='gray', gridcolor='lightgray')
+    fig.add_annotation(
+        x=0.02, y=0.98, 
+        text=f'R0: {r0_value:.2f}', 
+        showarrow=False, 
+        xref='paper', 
+        yref='paper'
+    )
 
     return fig
 
 def modelo_oscilador_armonico(m, k, x0, v0, t):
     """
-    Devuelve una gráfica del modelo de oscilador armónico simple.
+    Returns a graph of the simple harmonic oscillator model
 
-    Parámetros:
+    Parameters:
     -------
-    - m: Masa del objeto.
-    - k: Constante del resorte.
-    - x0: Posición inicial.
-    - v0: Velocidad inicial.
-    - t: Duración de la simulación.
+    m: Mass of the object
+    k: Spring constant
+    x0: Initial position
+    v0: Initial velocity
+    t: Simulation duration
     """
-    # Ecuaciones del oscilador armónico
+    # Harmonic oscillator equations
     omega = np.sqrt(k / m)
     time_points = np.linspace(0, t, 100)
 
-    # Solución exacta del oscilador armónico
+    # Exact solution of the harmonic oscillator
     x = x0 * np.cos(omega * time_points) + (v0 / omega) * np.sin(omega * time_points)
 
-    # Crear la figura
+    # Create figure
     fig = go.Figure()
 
-    # Posición del oscilador
-    fig.add_trace(go.Scatter(x=time_points, y=x, mode='lines', name='Posición (x)', line=dict(color='blue')))
+    # Oscillator position
+    fig.add_trace(go.Scatter(
+        x=time_points, 
+        y=x, 
+        mode='lines', 
+        name='Position (x)', 
+        line=dict(color='blue')
+    ))
 
-    # Actualizar el diseño
+    # Update layout
     fig.update_layout(
-        title='Modelo de Oscilador Armónico Simple',
-        xaxis_title='Tiempo (t)',
-        yaxis_title='Posición (x)',
+        title='Simple Harmonic Oscillator Model',
+        xaxis_title='Time (t)',
+        yaxis_title='Position (x)',
         width=800,
         template='plotly_white',
         margin=dict(l=10, r=10, t=90, b=0),

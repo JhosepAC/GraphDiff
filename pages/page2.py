@@ -86,5 +86,5 @@ layout = html.Div(className='Pages', children=[
 def grafica_edo1(x0=40, y0=9, alpha=0.1, beta=0.02, delta=0.01, gama=0.1, t=5):
 
     # Generar la gráfica con el modelo de Lotka-Volterra
-    fig = lotka_volterra_model(x0, y0, alpha, beta, delta, gama, t)
+    fig = lotka_volterra(x0, y0, alpha, beta, delta, gama, t)
     return fig
